@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistant IA - Maintenance Agroalimentaire</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            gap: 20px;
+            height: calc(100vh - 40px);
+        }
+
+        .sidebar, .history-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow-y: auto;
+        }
+
+        .sidebar h2, .history-panel h2 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            border-bottom: 3px solid #2a5298;
+            padding-bottom: 10px;
+        }
+
+        .quick-action {
+            background: #f0f4f8;
+            border: 2px solid #e0e7ef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quick-action:hover {
+            background: #e3edf7;
+            border-color: #2a5298;
+            transform: translateX(5px);
+        }
+
+        .quick-action h3 {
+            color: #1e3c72;
+            font-size: 0.95em;
+            margin-bottom: 5px;
+        }
+
+        .quick-action p {
+            color: #666;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 25px 30px;
+            border-bottom: 4px solid #f39c12;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95em;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e7ef;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1em;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #1e3c72;
+            border-bottom-color: #2a5298;
+            background: white;
+        }
+
+        .tab:hover {
+            background: #f0f4f8;
+        }
+
+        .tab-content {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .chat-container {
+            padding: 25px;
+            background: #f8f9fa;
+            min-height: 100%;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: #2a5298;
+        }
+
+        .message.assistant .message-avatar {
+            background: #27ae60;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 15px;
+            line-height: 1.6;
+        }
+
+        .message.user .message-content {
+            background: #2a5298;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.assistant .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e7ef;
+            border-bottom-left-radius: 5px;
+        }
+
+        .input-area {
+            padding: 20px 25px;
+            background: white;
+            border-top: 2px solid #e0e7ef;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 12px;
+        }
+
+        #userInput {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e7ef;
+            border-radius: 25px;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #userInput:focus {
+            border-color: #2a5298;
+        }
+
+        #sendBtn {
+            padding: 15px 35px;
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        #sendBtn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+        }
+
+        #sendBtn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #1e3c72;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e7ef;
+            border-radius: 8px;
+            font-size: 1em;
+            outline: none;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: #2a5298;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            background: #2a5298;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #1e3c72;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #27ae60;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e7ef;
+        }
+
+        .data-table th {
+            background: #f0f4f8;
+            color: #1e3c72;
+            font-weight: bold;
+        }
+
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .badge-critical {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .badge-info {
+            background: #3498db;
+            color: white;
+        }
+
+        .badge-resolved {
+            background: #27ae60;
+            color: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+
+        .machine-card {
+            background: white;
+            border: 2px solid #e0e7ef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .machine-card:hover {
+            border-color: #2a5298;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .machine-card h4 {
+            color: #1e3c72;
+            margin-bottom: 8px;
+        }
+
+        .machine-card .info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 15px;
+            color: #666;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .loading-dots span {
+            animation: blink 1.4s infinite;
+            font-size: 1.5em;
+        }
+
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes blink {
+            0%, 80%, 100% { opacity: 0; }
+            40% { opacity: 1; }
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #e0e7ef;
+            border-radius: 25px;
+            font-size: 1em;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #e0e7ef;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background: #2a5298;
+            color: white;
+            border-color: #2a5298;
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .sidebar, .history-panel {
+                order: 2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h2>🔧 Actions Rapides</h2>
+            
+            <div class="quick-action" onclick="sendQuickMessage('Quelles sont les étapes pour diagnostiquer une panne sur une ligne de production agroalimentaire?')">
+                <h3>📋 Diagnostic de panne</h3>
+                <p>Guide pour identifier les problèmes</p>
+            </div>
+
+            <div class="quick-action" onclick="sendQuickMessage('Comment effectuer la maintenance préventive d\'un convoyeur à bande?')">
+                <h3>⚙️ Maintenance préventive</h3>
+                <p>Procédures de maintenance régulière</p>
+            </div>
+
+            <div class="quick-action" onclick="sendQuickMessage('Quelles sont les normes d\'hygiène à respecter lors d\'une intervention?')">
+                <h3>🧼 Normes d\'hygiène</h3>
+                <p>Règles sanitaires HACCP</p>
+            </div>
+
+            <div class="quick-action" onclick="sendQuickMessage('Comment dépanner un système de pasteurisation?')">
+                <h3>🌡️ Problèmes thermiques</h3>
+                <p>Résolution des dysfonctionnements</p>
+            </div>
+
+            <div class="quick-action" onclick="showTab('machines')">
+                <h3>🏭 Voir mes machines</h3>
+                <p>Consulter la liste des équipements</p>
+            </div>
+
+            <div class="quick-action" onclick="showTab('breakdown')">
+                <h3>➕ Déclarer une panne</h3>
+                <p>Enregistrer un nouveau incident</p>
+            </div>
+
+            <div class="quick-action" onclick="showTab('history')">
+                <h3>📊 Historique</h3>
+                <p>Consulter les pannes passées</p>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="header">
+                <h1>🤖 Assistant IA - Maintenance Agroalimentaire</h1>
+                <p>Système de gestion et d'assistance pour la maintenance industrielle</p>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('chat')">💬 Assistant IA</button>
+                <button class="tab" onclick="showTab('machines')">🏭 Machines</button>
+                <button class="tab" onclick="showTab('breakdown')">➕ Nouvelle Panne</button>
+                <button class="tab" onclick="showTab('history')">📊 Historique</button>
+                <button class="tab" onclick="showTab('stats')">📈 Statistiques</button>
+            </div>
+
+            <!-- Tab Chat -->
+            <div id="chatTab" class="tab-content active">
+                <div class="chat-container" id="chatContainer">
+                    <div class="welcome-message">
+                        <h2>Bienvenue sur votre assistant de maintenance !</h2>
+                        <p>Je peux vous aider avec vos questions et aussi consulter l'historique des pannes de vos machines.</p>
+                        <p>Essayez par exemple : "Quelle est l'historique de pannes de la ligne de remplissage 1 ?"</p>
+                    </div>
+                </div>
+                <div class="loading" id="loading">
+                    <div class="loading-dots">
+                        <span>•</span>
+                        <span>•</span>
+                        <span>•</span>
+                    </div>
+                    L'assistant analyse votre question...
+                </div>
+                <div class="input-area">
+                    <div class="input-container">
+                        <input 
+                            type="text" 
+                            id="userInput" 
+                            placeholder="Posez votre question..."
+                            onkeypress="if(event.key === 'Enter') sendMessage()"
+                        >
+                        <button id="sendBtn" onclick="sendMessage()">Envoyer</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Machines -->
+            <div id="machinesTab" class="tab-content">
+                <div style="padding: 25px;">
+                    <h2>Liste des Machines</h2>
+                    <div class="search-box">
+                        <input type="text" id="machineSearch" placeholder="🔍 Rechercher une machine..." onkeyup="filterMachines()">
+                    </div>
+                    <div id="machinesList"></div>
+                </div>
+            </div>
+
+            <!-- Tab Nouvelle Panne -->
+            <div id="breakdownTab" class="tab-content">
+                <div style="padding: 25px;">
+                    <h2>Déclarer une Nouvelle Panne</h2>
+                    <form id="breakdownForm" onsubmit="submitBreakdown(event)">
+                        <div class="form-group">
+                            <label>Machine *</label>
+                            <select id="machineSelect" required>
+                                <option value="">Sélectionnez une machine</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Gravité *</label>
+                            <select id="severity" required>
+                                <option value="critique">🔴 Critique - Arrêt production</option>
+                                <option value="urgent">🟠 Urgent - Dégradation performance</option>
+                                <option value="normal">🟡 Normal - À planifier</option>
+                                <option value="info">🔵 Info - Surveillance</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Description de la panne *</label>
+                            <textarea id="description" required placeholder="Décrivez le problème rencontré..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Symptômes observés</label>
+                            <textarea id="symptoms" placeholder="Bruits anormaux, fuites, arrêts intempestifs..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Actions déjà entreprises</label>
+                            <textarea id="actions" placeholder="Vérifications, tests, réinitialisations..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success">📝 Enregistrer la Panne</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tab Historique -->
+            <div id="historyTab" class="tab-content">
+                <div style="padding: 25px;">
+                    <h2>Historique des Pannes</h2>
+                    <div class="filter-group">
+                        <button class="filter-btn active" onclick="filterHistory('all')">Toutes</button>
+                        <button class="filter-btn" onclick="filterHistory('critique')">Critiques</button>
+                        <button class="filter-btn" onclick="filterHistory('urgent')">Urgentes</button>
+                        <button class="filter-btn" onclick="filterHistory('resolved')">Résolues</button>
+                        <button class="filter-btn" onclick="filterHistory('pending')">En cours</button>
+                    </div>
+                    <div id="historyList"></div>
+                </div>
+            </div>
+
+            <!-- Tab Statistiques -->
+            <div id="statsTab" class="tab-content">
+                <div style="padding: 25px;">
+                    <h2>Statistiques de Maintenance</h2>
+                    <div class="stats-grid" id="statsGrid"></div>
+                    <h3 style="margin-top: 30px; color: #1e3c72;">Top 5 Machines à Problèmes</h3>
+                    <div id="topMachines"></div>
+                </div>
+            </div>
+        </main>
+
+        <aside class="history-panel">
+            <h2>📍 Dernières Pannes</h2>
+            <div id="recentBreakdowns"></div>
+        </aside>
+    </div>
+
+    <script>
+        // Base de données SQL simulée avec Web SQL (ou IndexedDB en production)
+        class DatabaseManager {
+            constructor() {
+                this.machines = [];
+                this.breakdowns = [];
+                this.initDatabase();
+            }
+
+            initDatabase() {
+                // Initialiser les machines
+                this.machines = [
+                    { id: 1, name: 'Ligne de Remplissage 1', type: 'Remplisseuse', zone: 'Production A', status: 'active' },
+                    { id: 2, name: 'Pasteurisateur Principal', type: 'Thermique', zone: 'Traitement', status: 'active' },
+                    { id: 3, name: 'Convoyeur Central', type: 'Transport', zone: 'Production A', status: 'active' },
+                    { id: 4, name: 'Système CIP Zone 1', type: 'Nettoyage', zone: 'Production A', status: 'active' },
+                    { id: 5, name: 'Ligne de Conditionnement 2', type: 'Conditionnement', zone: 'Production B', status: 'active' },
+                    { id: 6, name: 'Pompe Doseuse Additifs', type: 'Dosage', zone: 'Mélange', status: 'active' },
+                    { id: 7, name: 'Étiqueteuse Automatique', type: 'Étiquetage', zone: 'Production B', status: 'active' },
+                    { id: 8, name: 'Compresseur d\'Air Principal', type: 'Pneumatique', zone: 'Utilités', status: 'active' },
+                    { id: 9, name: 'Tunnel de Refroidissement', type: 'Thermique', zone: 'Traitement', status: 'active' },
+                    { id: 10, name: 'Ensacheuse Verticale', type: 'Conditionnement', zone: 'Production C', status: 'active' }
+                ];
+
+                // Initialiser quelques pannes d'exemple
+                this.breakdowns = [
+                    {
+                        id: 1,
+                        machine_id: 1,
+                        date: '2026-02-08 14:30',
+                        severity: 'critique',
+                        description: 'Arrêt complet de la ligne - problème moteur principal',
+                        symptoms: 'Disjonction moteur, odeur de brûlé',
+                        actions: 'Vérification alimentation électrique, test isolation',
+                        solution: 'Remplacement du moteur principal',
+                        technician: 'Martin Dubois',
+                        duration: 180,
+                        status: 'resolved'
+                    },
+                    {
+                        id: 2,
+                        machine_id: 2,
+                        date: '2026-02-07 09:15',
+                        severity: 'urgent',
+                        description: 'Température pasteurisation instable',
+                        symptoms: 'Fluctuation température ±5°C, alarme régulation',
+                        actions: 'Vérification sonde PT100, calibration',
+                        solution: 'Remplacement sonde de température défectueuse',
+                        technician: 'Sophie Laurent',
+                        duration: 90,
+                        status: 'resolved'
+                    },
+                    {
+                        id: 3,
+                        machine_id: 3,
+                        date: '2026-02-06 16:45',
+                        severity: 'normal',
+                        description: 'Bruit anormal au niveau du réducteur',
+                        symptoms: 'Grincement intermittent, légère vibration',
+                        actions: 'Inspection visuelle, vérification niveau huile',
+                        solution: 'Graissage et resserrage fixations',
+                        technician: 'Jean Moreau',
+                        duration: 45,
+                        status: 'resolved'
+                    },
+                    {
+                        id: 4,
+                        machine_id: 4,
+                        date: '2026-02-09 08:00',
+                        severity: 'critique',
+                        description: 'Fuite importante circuit CIP',
+                        symptoms: 'Fuite eau + soude, perte de pression',
+                        actions: 'Isolation circuit, recherche fuite',
+                        solution: '',
+                        technician: 'Pierre Blanc',
+                        duration: null,
+                        status: 'pending'
+                    },
+                    {
+                        id: 5,
+                        machine_id: 6,
+                        date: '2026-02-05 11:20',
+                        severity: 'urgent',
+                        description: 'Débit pompe doseuse irrégulier',
+                        symptoms: 'Variation dosage ±10%, alarme process',
+                        actions: 'Vérification clapets, nettoyage filtre',
+                        solution: 'Remplacement membrane pompe',
+                        technician: 'Sophie Laurent',
+                        duration: 60,
+                        status: 'resolved'
+                    },
+                    {
+                        id: 6,
+                        machine_id: 1,
+                        date: '2026-01-28 10:30',
+                        severity: 'normal',
+                        description: 'Défaut capteur niveau',
+                        symptoms: 'Arrêt intempestif, alarme niveau',
+                        actions: 'Test capteur, nettoyage',
+                        solution: 'Nettoyage capteur ultrason encrassé',
+                        technician: 'Martin Dubois',
+                        duration: 30,
+                        status: 'resolved'
+                    },
+                    {
+                        id: 7,
+                        machine_id: 8,
+                        date: '2026-01-25 15:00',
+                        severity: 'critique',
+                        description: 'Compresseur ne démarre plus',
+                        symptoms: 'Aucun démarrage, témoin défaut allumé',
+                        actions: 'Vérification électrique, test thermique',
+                        solution: 'Remplacement contacteur principal',
+                        technician: 'Jean Moreau',
+                        duration: 120,
+                        status: 'resolved'
+                    }
+                ];
+
+                this.saveToLocalStorage();
+            }
+
+            saveToLocalStorage() {
+                localStorage.setItem('machines', JSON.stringify(this.machines));
+                localStorage.setItem('breakdowns', JSON.stringify(this.breakdowns));
+            }
+
+            loadFromLocalStorage() {
+                const machines = localStorage.getItem('machines');
+                const breakdowns = localStorage.getItem('breakdowns');
+                
+                if (machines) this.machines = JSON.parse(machines);
+                if (breakdowns) this.breakdowns = JSON.parse(breakdowns);
+            }
+
+            getMachines() {
+                return this.machines;
+            }
+
+            getMachine(id) {
+                return this.machines.find(m => m.id === parseInt(id));
+            }
+
+            getBreakdowns(machineId = null) {
+                if (machineId) {
+                    return this.breakdowns.filter(b => b.machine_id === parseInt(machineId));
+                }
+                return this.breakdowns;
+            }
+
+            addBreakdown(breakdown) {
+                const id = this.breakdowns.length > 0 ? Math.max(...this.breakdowns.map(b => b.id)) + 1 : 1;
+                const newBreakdown = {
+                    id,
+                    ...breakdown,
+                    date: new Date().toISOString().slice(0, 16).replace('T', ' '),
+                    status: 'pending'
+                };
+                this.breakdowns.unshift(newBreakdown);
+                this.saveToLocalStorage();
+                return newBreakdown;
+            }
+
+            getStats() {
+                const total = this.breakdowns.length;
+                const resolved = this.breakdowns.filter(b => b.status === 'resolved').length;
+                const pending = this.breakdowns.filter(b => b.status === 'pending').length;
+                const critical = this.breakdowns.filter(b => b.severity === 'critique').length;
+                
+                const avgDuration = this.breakdowns
+                    .filter(b => b.duration)
+                    .reduce((sum, b) => sum + b.duration, 0) / resolved || 0;
+
+                return { total, resolved, pending, critical, avgDuration: Math.round(avgDuration) };
+            }
+
+            getTopMachines() {
+                const machineBreakdowns = {};
+                this.breakdowns.forEach(b => {
+                    machineBreakdowns[b.machine_id] = (machineBreakdowns[b.machine_id] || 0) + 1;
+                });
+
+                return Object.entries(machineBreakdowns)
+                    .map(([id, count]) => ({
+                        machine: this.getMachine(id),
+                        count
+                    }))
+                    .sort((a, b) => b.count - a.count)
+                    .slice(0, 5);
+            }
+        }
+
+        const db = new DatabaseManager();
+        db.loadFromLocalStorage();
+
+        // Variables globales
+        const chatContainer = document.getElementById('chatContainer');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const loading = document.getElementById('loading');
+        let conversationHistory = [];
+        let currentFilter = 'all';
+
+        const systemPrompt = `Tu es un expert en maintenance et dépannage dans l'industrie agroalimentaire avec accès à une base de données de machines et d'historique de pannes.
+
+Quand l'utilisateur te demande des informations sur une machine ou son historique, je te fournirai les données en JSON dans le contexte.
+
+Tes réponses doivent:
+- Être claires, structurées et professionnelles
+- Analyser l'historique des pannes quand disponible
+- Identifier les patterns récurrents
+- Proposer des solutions basées sur les cas similaires passés
+- Inclure les aspects sécurité et hygiène
+- Suggérer des actions préventives basées sur l'historique
+- Mentionner les normes HACCP, CE quand approprié`;
+
+        // Fonctions d'interface
+        function showTab(tabName) {
+            // Cacher tous les contenus
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+
+            // Afficher le bon contenu
+            const tabs = {
+                'chat': 'chatTab',
+                'machines': 'machinesTab',
+                'breakdown': 'breakdownTab',
+                'history': 'historyTab',
+                'stats': 'statsTab'
+            };
+
+            document.getElementById(tabs[tabName]).classList.add('active');
+            event.target.classList.add('active');
+
+            // Charger les données selon l'onglet
+            if (tabName === 'machines') loadMachines();
+            if (tabName === 'breakdown') loadMachineSelect();
+            if (tabName === 'history') loadHistory();
+            if (tabName === 'stats') loadStats();
+        }
+
+        function loadMachines() {
+            const machines = db.getMachines();
+            const container = document.getElementById('machinesList');
+            
+            container.innerHTML = machines.map(m => {
+                const breakdowns = db.getBreakdowns(m.id);
+                const pending = breakdowns.filter(b => b.status === 'pending').length;
+                
+                return `
+                    <div class="machine-card" onclick="viewMachineHistory(${m.id})">
+                        <h4>${m.name}</h4>
+                        <div class="info">
+                            <span>Type: ${m.type}</span>
+                            <span>Zone: ${m.zone}</span>
+                        </div>
+                        <div class="info" style="margin-top: 8px;">
+                            <span>Total pannes: ${breakdowns.length}</span>
+                            ${pending > 0 ? `<span class="badge badge-warning">${pending} en cours</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterMachines() {
+            const search = document.getElementById('machineSearch').value.toLowerCase();
+            const cards = document.querySelectorAll('.machine-card');
+            
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(search) ? 'block' : 'none';
+            });
+        }
+
+        function loadMachineSelect() {
+            const machines = db.getMachines();
+            const select = document.getElementById('machineSelect');
+            
+            select.innerHTML = '<option value="">Sélectionnez une machine</option>' +
+                machines.map(m => `<option value="${m.id}">${m.name} (${m.type})</option>`).join('');
+        }
+
+        function submitBreakdown(event) {
+            event.preventDefault();
+            
+            const breakdown = {
+                machine_id: parseInt(document.getElementById('machineSelect').value),
+                severity: document.getElementById('severity').value,
+                description: document.getElementById('description').value,
+                symptoms: document.getElementById('symptoms').value,
+                actions: document.getElementById('actions').value,
+                technician: 'Utilisateur actuel',
+                solution: '',
+                duration: null
+            };
+
+            db.addBreakdown(breakdown);
+            
+            alert('✅ Panne enregistrée avec succès !');
+            document.getElementById('breakdownForm').reset();
+            loadRecentBreakdowns();
+        }
+
+        function loadHistory() {
+            const breakdowns = db.getBreakdowns();
+            displayBreakdowns(breakdowns);
+        }
+
+        function filterHistory(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            let breakdowns = db.getBreakdowns();
+            
+            if (filter === 'critique') breakdowns = breakdowns.filter(b => b.severity === 'critique');
+            if (filter === 'urgent') breakdowns = breakdowns.filter(b => b.severity === 'urgent');
+            if (filter === 'resolved') breakdowns = breakdowns.filter(b => b.status === 'resolved');
+            if (filter === 'pending') breakdowns = breakdowns.filter(b => b.status === 'pending');
+
+            displayBreakdowns(breakdowns);
+        }
+
+        function displayBreakdowns(breakdowns) {
+            const container = document.getElementById('historyList');
+            
+            if (breakdowns.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Aucune panne trouvée</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Machine</th>
+                            <th>Gravité</th>
+                            <th>Description</th>
+                            <th>Technicien</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${breakdowns.map(b => {
+                            const machine = db.getMachine(b.machine_id);
+                            const severityBadge = {
+                                'critique': 'badge-critical',
+                                'urgent': 'badge-warning',
+                                'normal': 'badge-info',
+                                'info': 'badge-info'
+                            };
+                            
+                            return `
+                                <tr onclick="viewBreakdownDetails(${b.id})" style="cursor: pointer;">
+                                    <td>${new Date(b.date).toLocaleDateString('fr-FR')} ${new Date(b.date).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}</td>
+                                    <td>${machine.name}</td>
+                                    <td><span class="badge ${severityBadge[b.severity]}">${b.severity.toUpperCase()}</span></td>
+                                    <td>${b.description.substring(0, 50)}...</td>
+                                    <td>${b.technician}</td>
+                                    <td><span class="badge ${b.status === 'resolved' ? 'badge-resolved' : 'badge-warning'}">${b.status === 'resolved' ? 'Résolu' : 'En cours'}</span></td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function loadStats() {
+            const stats = db.getStats();
+            const topMachines = db.getTopMachines();
+
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h3>${stats.total}</h3>
+                    <p>Total Pannes</p>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <h3>${stats.pending}</h3>
+                    <p>En Cours</p>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <h3>${stats.resolved}</h3>
+                    <p>Résolues</p>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                    <h3>${stats.avgDuration} min</h3>
+                    <p>Temps Moyen</p>
+                </div>
+            `;
+
+            document.getElementById('topMachines').innerHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Rang</th>
+                            <th>Machine</th>
+                            <th>Type</th>
+                            <th>Nombre de Pannes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${topMachines.map((item, index) => `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${item.machine.name}</td>
+                                <td>${item.machine.type}</td>
+                                <td><strong>${item.count}</strong></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function loadRecentBreakdowns() {
+            const breakdowns = db.getBreakdowns().slice(0, 5);
+            const container = document.getElementById('recentBreakdowns');
+            
+            container.innerHTML = breakdowns.map(b => {
+                const machine = db.getMachine(b.machine_id);
+                const severityColors = {
+                    'critique': '#e74c3c',
+                    'urgent': '#f39c12',
+                    'normal': '#3498db',
+                    'info': '#95a5a6'
+                };
+                
+                return `
+                    <div class="machine-card" onclick="viewBreakdownDetails(${b.id})">
+                        <h4 style="color: ${severityColors[b.severity]}">${machine.name}</h4>
+                        <p style="font-size: 0.85em; color: #666; margin: 5px 0;">${b.description.substring(0, 60)}...</p>
+                        <div class="info" style="font-size: 0.8em;">
+                            <span>${new Date(b.date).toLocaleDateString('fr-FR')}</span>
+                            <span class="badge ${b.status === 'resolved' ? 'badge-resolved' : 'badge-warning'}">${b.status === 'resolved' ? 'OK' : 'En cours'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function viewMachineHistory(machineId) {
+            const machine = db.getMachine(machineId);
+            const breakdowns = db.getBreakdowns(machineId);
+            
+            const message = `Donne-moi l'historique et une analyse des pannes de la machine "${machine.name}"`;
+            const context = {
+                machine: machine,
+                breakdowns: breakdowns
+            };
+            
+            userInput.value = message;
+            sendMessage(JSON.stringify(context));
+        }
+
+        function viewBreakdownDetails(breakdownId) {
+            const breakdown = db.getBreakdowns().find(b => b.id === breakdownId);
+            const machine = db.getMachine(breakdown.machine_id);
+            
+            const details = `
+📋 DÉTAILS DE LA PANNE #${breakdown.id}
+
+🏭 Machine: ${machine.name}
+📅 Date: ${breakdown.date}
+⚠️ Gravité: ${breakdown.severity.toUpperCase()}
+👤 Technicien: ${breakdown.technician}
+
+📝 Description:
+${breakdown.description}
+
+🔍 Symptômes:
+${breakdown.symptoms || 'Non renseignés'}
+
+🔧 Actions entreprises:
+${breakdown.actions || 'Aucune'}
+
+${breakdown.solution ? `✅ Solution: ${breakdown.solution}` : '⏳ Statut: En cours'}
+${breakdown.duration ? `⏱️ Durée: ${breakdown.duration} minutes` : ''}
+            `;
+            
+            alert(details);
+        }
+
+        // Chat avec IA
+        function addMessage(content, role) {
+            const welcomeMsg = chatContainer.querySelector('.welcome-message');
+            if (welcomeMsg) welcomeMsg.remove();
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = role === 'user' ? 'T' : '🤖';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.innerHTML = content.replace(/\n/g, '<br>');
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(messageContent);
+            chatContainer.appendChild(messageDiv);
+            
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        async function sendMessage(contextData = null) {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            userInput.disabled = true;
+            sendBtn.disabled = true;
+
+            addMessage(message, 'user');
+            userInput.value = '';
+
+            // Analyser si la question concerne une machine ou l'historique
+            let enrichedMessage = message;
+            if (!contextData) {
+                const machineMentioned = db.getMachines().find(m => 
+                    message.toLowerCase().includes(m.name.toLowerCase())
+                );
+                
+                if (machineMentioned) {
+                    const breakdowns = db.getBreakdowns(machineMentioned.id);
+                    contextData = JSON.stringify({
+                        machine: machineMentioned,
+                        breakdowns: breakdowns
+                    });
+                }
+            }
+
+            if (contextData) {
+                enrichedMessage = `${message}\n\nDonnées de contexte (base de données): ${contextData}`;
+            }
+
+            conversationHistory.push({
+                role: 'user',
+                content: enrichedMessage
+            });
+
+            loading.classList.add('active');
+
+            try {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 1000,
+                        system: systemPrompt,
+                        messages: conversationHistory
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.content && data.content[0] && data.content[0].text) {
+                    const assistantMessage = data.content[0].text;
+                    
+                    conversationHistory.push({
+                        role: 'assistant',
+                        content: assistantMessage
+                    });
+
+                    addMessage(assistantMessage, 'assistant');
+                } else {
+                    addMessage("Désolé, je n'ai pas pu traiter votre demande.", 'assistant');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                addMessage("Une erreur s'est produite. Vérifiez votre connexion.", 'assistant');
+            }
+
+            loading.classList.remove('active');
+            userInput.disabled = false;
+            sendBtn.disabled = false;
+            userInput.focus();
+        }
+
+        function sendQuickMessage(message) {
+            userInput.value = message;
+            showTab('chat');
+            setTimeout(() => sendMessage(), 100);
+        }
+
+        // Initialisation
+        window.addEventListener('load', () => {
+            loadRecentBreakdowns();
+            userInput.focus();
+        });
+    </script>
+</body>
+</html>
