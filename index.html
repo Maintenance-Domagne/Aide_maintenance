@@ -86,6 +86,30 @@
             margin-bottom: 8px;
         }
 
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 12px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #27ae60;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
         .tabs {
             display: flex;
             background: #f8f9fa;
@@ -366,28 +390,6 @@
             font-size: 1em;
         }
 
-        .sql-info {
-            background: #f0f4f8;
-            border-left: 4px solid #2a5298;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        }
-
-        .sql-info h3 {
-            color: #1e3c72;
-            margin-bottom: 10px;
-        }
-
-        .sql-info pre {
-            background: #2c3e50;
-            color: #ecf0f1;
-            padding: 15px;
-            border-radius: 5px;
-            overflow-x: auto;
-            font-size: 0.9em;
-        }
-
         .analysis-section {
             background: #e8f5e9;
             border-left: 4px solid #27ae60;
@@ -407,6 +409,24 @@
             margin: 8px 0;
             border-radius: 5px;
             border-left: 3px solid #2a5298;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
         }
 
         @media (max-width: 968px) {
@@ -438,23 +458,27 @@
                 <h3>📊 Historique Complet</h3>
             </div>
 
-            <div class="quick-action" onclick="showTab('database')">
-                <h3>💾 Structure SQL</h3>
-            </div>
-
             <div class="quick-action" onclick="askQuestion('Quelles sont les pannes les plus fréquentes ?')">
                 <h3>📈 Pannes Fréquentes</h3>
             </div>
 
-            <div class="quick-action" onclick="askQuestion('Quels sont les conseils de maintenance préventive ?')">
+            <div class="quick-action" onclick="askQuestion('Conseils de maintenance préventive')">
                 <h3>🛡️ Maintenance Préventive</h3>
+            </div>
+
+            <div class="quick-action" onclick="testConnection()">
+                <h3>🔌 Tester la Connexion</h3>
             </div>
         </aside>
 
         <main class="main-content">
             <div class="header">
-                <h1>🤖 Assistant IA - Maintenance Domagné</h1>
-                <p>Base de données des pannes et résolutions</p>
+                <h1>🤖 Assistant IA - Maintenance Agroalimentaire</h1>
+                <p>Système connecté à MySQL</p>
+                <div class="status-indicator">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span id="statusText">Connexion en cours...</span>
+                </div>
             </div>
 
             <div class="tabs">
@@ -462,7 +486,6 @@
                 <button class="tab" onclick="showTab('machines')">🏭 Machines</button>
                 <button class="tab" onclick="showTab('add')">➕ Ajouter</button>
                 <button class="tab" onclick="showTab('history')">📊 Historique</button>
-                <button class="tab" onclick="showTab('database')">💾 Base SQL</button>
             </div>
 
             <!-- Tab Chat -->
@@ -470,11 +493,11 @@
                 <div class="chat-container" id="chatContainer">
                     <div class="welcome-message">
                         <h2>Bienvenue sur votre assistant de maintenance !</h2>
-                        <p>Demandez-moi l'historique d'une machine ou des conseils de dépannage.</p>
+                        <p>Connecté à votre base de données MySQL en temps réel.</p>
                         <p><strong>Exemples :</strong></p>
                         <p>• "Historique du Pasteurisateur"</p>
                         <p>• "Problèmes de température"</p>
-                        <p>• "Comment entretenir le CIP ?"</p>
+                        <p>• "Maintenance préventive"</p>
                     </div>
                 </div>
                 <div class="loading" id="loading">
@@ -513,6 +536,7 @@
             <div id="addTab" class="tab-content">
                 <div style="padding: 25px;">
                     <h2>Ajouter une Panne</h2>
+                    <div id="addAlert"></div>
                     <form id="breakdownForm" onsubmit="addBreakdown(event)">
                         <div class="form-group">
                             <label>Nom de la Machine *</label>
@@ -530,7 +554,7 @@
                             <label>Résolution *</label>
                             <textarea id="resolution" required placeholder="Solution appliquée..."></textarea>
                         </div>
-                        <button type="submit" class="btn">📝 Enregistrer</button>
+                        <button type="submit" class="btn">📝 Enregistrer dans MySQL</button>
                     </form>
                 </div>
             </div>
@@ -538,419 +562,40 @@
             <!-- Tab Historique -->
             <div id="historyTab" class="tab-content">
                 <div style="padding: 25px;">
-                    <h2>Historique des Pannes</h2>
+                    <h2>Historique des Pannes (MySQL)</h2>
+                    <button class="btn" onclick="loadHistory()" style="margin-bottom: 20px;">🔄 Actualiser</button>
                     <div id="historyList"></div>
-                </div>
-            </div>
-
-            <!-- Tab Base de données -->
-            <div id="databaseTab" class="tab-content">
-                <div style="padding: 25px;">
-                    <h2>Structure de la Base de Données MySQL</h2>
-                    
-                    <div class="sql-info">
-                        <h3>📋 Création de la Table</h3>
-                        <pre>CREATE TABLE pannes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    machine_name VARCHAR(255) NOT NULL,
-    problem TEXT NOT NULL,
-    cause TEXT NOT NULL,
-    resolution TEXT NOT NULL,
-    date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);</pre>
-                    </div>
-
-                    <div class="sql-info">
-                        <h3>➕ Insertion de Données</h3>
-                        <pre>INSERT INTO pannes (machine_name, problem, cause, resolution) 
-VALUES ('Pasteurisateur', 'Température instable', 'Sonde PT100 défectueuse', 'Remplacement de la sonde');</pre>
-                    </div>
-
-                    <div class="sql-info">
-                        <h3>🔍 Recherche par Machine</h3>
-                        <pre>SELECT * FROM pannes 
-WHERE machine_name = 'Pasteurisateur' 
-ORDER BY date_created DESC;</pre>
-                    </div>
-
-                    <div class="sql-info">
-                        <h3>📊 Statistiques</h3>
-                        <pre>SELECT machine_name, COUNT(*) as total_pannes 
-FROM pannes 
-GROUP BY machine_name 
-ORDER BY total_pannes DESC;</pre>
-                    </div>
-
-                    <button class="btn" onclick="downloadSQL()">📥 Télécharger le Script SQL</button>
                 </div>
             </div>
         </main>
     </div>
 
     <script>
-        // Base de données
-        class Database {
-            constructor() {
-                this.data = [];
-                this.initData();
-            }
+        const API_URL = 'api.php'; // À adapter selon votre configuration
 
-            initData() {
-                const savedData = localStorage.getItem('pannes_db');
-                if (savedData) {
-                    this.data = JSON.parse(savedData);
-                } else {
-                    this.data = [
-                        {
-                            id: 1,
-                            machine_name: 'Dépalettiseur',
-                            problem: 'Problème en sortie, évacuation des caisses',
-                            cause: 'Cellules de detection encrassées où déreglées',
-                            resolution: 'Réglages et nettoyage des cellules de détection',
-                            date_created: '2026-02-10 13:00:00'
-                        },
-                        {
-                            id: 2,
-                            machine_name: 'Dépalettiseur',
-                            problem: 'Défaut noeud profinet',
-                            cause: 'Recepteurs, câbles ou liaison profinet défectueuse',
-                            resolution: 'Réparation du câble et de la prise profinet du bras intercalaire',
-                            date_created: '2026-02-10 13:00:00'
-                        },
-                        {
-                            id: 3,
-                            machine_name: 'Dépalettiseur',
-                            problem: 'Défaut cellule "time out"',
-                            cause: 'Cellules encrassées ou déreglées',
-                            resolution: 'Nettoyage et réglage des cellules de détection',
-                            date_created: '2026-02-10 13:00:00'
-                        },
-                        {
-                            id: 4,
-                            machine_name: '',
-                            problem: '',
-                            cause: '',
-                            resolution: '',
-                            date_created: ''
-                        },
-                        {
-                            id: 5,
-                            machine_name: '',
-                            problem: '',
-                            cause: '',
-                            resolution: '',
-                            date_created: ''
-                        },
-                        {
-                            id: 6,
-                            machine_name: '',
-                            problem: '',
-                            cause: '',
-                            resolution: '',
-                            date_created: ''
-                        },
-                        {
-                            id: 7,
-                            machine_name: '',
-                            problem: '',
-                            cause: '',
-                            resolution: '',
-                            date_created: ''
-                        },
-                        {
-                            id: 8,
-                            machine_name: '',
-                            problem: '',
-                            cause: '',
-                            resolution: '',
-                            date_created: ''
-                        }
-                    ];
-                    this.save();
-                }
-            }
+        // Test de connexion au démarrage
+        window.addEventListener('load', () => {
+            testConnection();
+            userInput.focus();
+        });
 
-            save() {
-                localStorage.setItem('pannes_db', JSON.stringify(this.data));
-            }
-
-            getAll() {
-                return this.data;
-            }
-
-            getByMachine(machineName) {
-                return this.data.filter(item => 
-                    item.machine_name.toLowerCase().includes(machineName.toLowerCase())
-                );
-            }
-
-            add(item) {
-                const id = this.data.length > 0 ? Math.max(...this.data.map(d => d.id)) + 1 : 1;
-                const newItem = {
-                    id,
-                    ...item,
-                    date_created: new Date().toISOString().slice(0, 19).replace('T', ' ')
-                };
-                this.data.unshift(newItem);
-                this.save();
-                return newItem;
-            }
-
-            getMachineNames() {
-                const names = [...new Set(this.data.map(d => d.machine_name))];
-                return names.sort();
-            }
-
-            search(query) {
-                query = query.toLowerCase();
-                return this.data.filter(item => 
-                    item.machine_name.toLowerCase().includes(query) ||
-                    item.problem.toLowerCase().includes(query) ||
-                    item.cause.toLowerCase().includes(query) ||
-                    item.resolution.toLowerCase().includes(query)
-                );
-            }
-        }
-
-        const db = new Database();
-        const chatContainer = document.getElementById('chatContainer');
-        const userInput = document.getElementById('userInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const loading = document.getElementById('loading');
-
-        // Assistant IA local
-        class LocalAI {
-            analyzeQuery(query) {
-                const machines = db.getMachineNames();
-                let machineFound = null;
-
-                // Chercher si une machine est mentionnée
-                for (let machine of machines) {
-                    if (query.toLowerCase().includes(machine.toLowerCase())) {
-                        machineFound = machine;
-                        break;
-                    }
-                }
-
-                // Si machine trouvée, retourner son historique
-                if (machineFound) {
-                    return this.generateMachineReport(machineFound);
-                }
-
-                // Recherche par mots-clés
-                if (query.match(/température|thermique|chaleur|froid/i)) {
-                    return this.searchByKeyword('température');
-                }
-
-                if (query.match(/pression|fuite|circuit/i)) {
-                    return this.searchByKeyword('pression');
-                }
-
-                if (query.match(/capteur|sonde|détecteur/i)) {
-                    return this.searchByKeyword('capteur');
-                }
-
-                if (query.match(/maintenance|entretien|préventive/i)) {
-                    return this.getMaintenanceAdvice();
-                }
-
-                if (query.match(/fréquent|récurrent|souvent/i)) {
-                    return this.getFrequentIssues();
-                }
-
-                // Réponse par défaut
-                return this.getGeneralHelp();
-            }
-
-            generateMachineReport(machineName) {
-                const pannes = db.getByMachine(machineName);
-
-                if (pannes.length === 0) {
-                    return `<strong>Machine : ${machineName}</strong><br><br>Aucune panne enregistrée pour cette machine.`;
-                }
-
-                let response = `<div class="analysis-section">
-                    <h4>📊 Analyse : ${machineName}</h4>
-                    <p><strong>Total de pannes :</strong> ${pannes.length}</p>
-                </div>`;
-
-                response += `<h4>🔍 Historique des Pannes :</h4>`;
-
-                pannes.forEach((panne, index) => {
-                    response += `
-                        <div class="panne-item">
-                            <strong>Panne #${index + 1}</strong> - ${new Date(panne.date_created).toLocaleDateString('fr-FR')}<br>
-                            <strong>Problème :</strong> ${panne.problem}<br>
-                            <strong>Cause :</strong> ${panne.cause}<br>
-                            <strong>✅ Résolution :</strong> ${panne.resolution}
-                        </div>
-                    `;
-                });
-
-                // Analyse des patterns
-                const causes = pannes.map(p => p.cause.toLowerCase());
-                const hasTempIssues = causes.some(c => c.includes('température') || c.includes('sonde'));
-                const hasMechIssues = causes.some(c => c.includes('roulement') || c.includes('courroie'));
-
-                if (pannes.length > 1) {
-                    response += `<div class="analysis-section">
-                        <h4>💡 Recommandations :</h4>`;
-                    
-                    if (hasTempIssues) {
-                        response += `<p>• Vérifier régulièrement les sondes de température (calibration mensuelle recommandée)</p>`;
-                    }
-                    if (hasMechIssues) {
-                        response += `<p>• Planifier une maintenance préventive des éléments mécaniques</p>`;
-                    }
-                    
-                    response += `<p>• Documenter toutes les interventions pour suivre l'évolution</p>
-                        <p>• Former les techniciens aux spécificités de cette machine</p>
-                    </div>`;
-                }
-
-                return response;
-            }
-
-            searchByKeyword(keyword) {
-                const results = db.search(keyword);
+        async function testConnection() {
+            try {
+                const response = await fetch(`${API_URL}?action=test`);
+                const data = await response.json();
                 
-                if (results.length === 0) {
-                    return `Aucune panne trouvée concernant : <strong>${keyword}</strong>`;
+                if (data.success) {
+                    document.getElementById('statusDot').style.background = '#27ae60';
+                    document.getElementById('statusText').textContent = `Connecté à MySQL (${data.count} pannes)`;
+                } else {
+                    document.getElementById('statusDot').style.background = '#e74c3c';
+                    document.getElementById('statusText').textContent = 'Erreur connexion MySQL';
                 }
-
-                let response = `<div class="analysis-section">
-                    <h4>🔍 Recherche : "${keyword}"</h4>
-                    <p>${results.length} résultat(s) trouvé(s)</p>
-                </div>`;
-
-                results.forEach((panne, index) => {
-                    response += `
-                        <div class="panne-item">
-                            <strong>${panne.machine_name}</strong> - ${new Date(panne.date_created).toLocaleDateString('fr-FR')}<br>
-                            <strong>Problème :</strong> ${panne.problem}<br>
-                            <strong>Cause :</strong> ${panne.cause}<br>
-                            <strong>✅ Résolution :</strong> ${panne.resolution}
-                        </div>
-                    `;
-                });
-
-                return response;
-            }
-
-            getMaintenanceAdvice() {
-                return `<div class="analysis-section">
-                    <h4>🛡️ Conseils de Maintenance Préventive</h4>
-                </div>
-
-                <h4>📋 Recommandations Générales :</h4>
-
-                <div class="panne-item">
-                    <strong>1. Inspection Quotidienne</strong><br>
-                    • Vérifier les niveaux (huile, eau, produits)<br>
-                    • Écouter les bruits anormaux<br>
-                    • Contrôler les températures<br>
-                    • Vérifier l'absence de fuites
-                </div>
-
-                <div class="panne-item">
-                    <strong>2. Maintenance Hebdomadaire</strong><br>
-                    • Nettoyage des capteurs<br>
-                    • Vérification des connexions électriques<br>
-                    • Test des alarmes<br>
-                    • Inspection visuelle des courroies et chaînes
-                </div>
-
-                <div class="panne-item">
-                    <strong>3. Maintenance Mensuelle</strong><br>
-                    • Calibration des sondes de température<br>
-                    • Graissage des éléments mécaniques<br>
-                    • Vérification des serrages<br>
-                    • Test des systèmes de sécurité
-                </div>
-
-                <div class="panne-item">
-                    <strong>4. Maintenance Trimestrielle</strong><br>
-                    • Remplacement des filtres<br>
-                    • Vérification des roulements<br>
-                    • Test approfondi des automatismes<br>
-                    • Analyse vibratoire si disponible
-                </div>
-
-                <div class="analysis-section">
-                    <h4>💡 Points d'Attention Spécifiques en Agroalimentaire :</h4>
-                    <p>• Respect des normes HACCP lors de toute intervention</p>
-                    <p>• Nettoyage et désinfection après chaque maintenance</p>
-                    <p>• Utilisation de lubrifiants agréés contact alimentaire</p>
-                    <p>• Documentation complète de chaque intervention</p>
-                </div>`;
-            }
-
-            getFrequentIssues() {
-                const machines = {};
-                db.getAll().forEach(panne => {
-                    machines[panne.machine_name] = (machines[panne.machine_name] || 0) + 1;
-                });
-
-                const sorted = Object.entries(machines).sort((a, b) => b[1] - a[1]);
-
-                let response = `<div class="analysis-section">
-                    <h4>📈 Statistiques des Pannes</h4>
-                    <p>Total de pannes enregistrées : ${db.getAll().length}</p>
-                </div>
-
-                <h4>🏆 Machines avec le plus de pannes :</h4>`;
-
-                sorted.forEach(([machine, count], index) => {
-                    response += `
-                        <div class="panne-item">
-                            <strong>#${index + 1} - ${machine}</strong><br>
-                            ${count} panne(s) enregistrée(s)<br>
-                            <span style="color: #2a5298; cursor: pointer;" onclick="askQuestion('Historique ${machine}')">
-                                → Voir l'historique complet
-                            </span>
-                        </div>
-                    `;
-                });
-
-                return response;
-            }
-
-            getGeneralHelp() {
-                return `<div class="analysis-section">
-                    <h4>👋 Comment puis-je vous aider ?</h4>
-                </div>
-
-                <h4>💬 Exemples de questions :</h4>
-
-                <div class="panne-item" style="cursor: pointer;" onclick="askQuestion('Historique du Pasteurisateur')">
-                    • "Historique du Pasteurisateur"<br>
-                    <small>Voir toutes les pannes d'une machine spécifique</small>
-                </div>
-
-                <div class="panne-item" style="cursor: pointer;" onclick="askQuestion('Problèmes de température')">
-                    • "Problèmes de température"<br>
-                    <small>Rechercher toutes les pannes liées à la température</small>
-                </div>
-
-                <div class="panne-item" style="cursor: pointer;" onclick="askQuestion('Maintenance préventive')">
-                    • "Maintenance préventive"<br>
-                    <small>Obtenir des conseils de maintenance</small>
-                </div>
-
-                <div class="panne-item" style="cursor: pointer;" onclick="askQuestion('Pannes fréquentes')">
-                    • "Pannes fréquentes"<br>
-                    <small>Voir les statistiques et machines problématiques</small>
-                </div>
-
-                <div class="analysis-section">
-                    <h4>📊 Base de données actuelle :</h4>
-                    <p>• ${db.getAll().length} pannes enregistrées</p>
-                    <p>• ${db.getMachineNames().length} machines référencées</p>
-                </div>`;
+            } catch (error) {
+                document.getElementById('statusDot').style.background = '#e74c3c';
+                document.getElementById('statusText').textContent = 'API non disponible';
             }
         }
-
-        const ai = new LocalAI();
 
         // Fonctions d'interface
         function showTab(tabName) {
@@ -961,8 +606,7 @@ ORDER BY total_pannes DESC;</pre>
                 'chat': 'chatTab',
                 'machines': 'machinesTab',
                 'add': 'addTab',
-                'history': 'historyTab',
-                'database': 'databaseTab'
+                'history': 'historyTab'
             };
 
             document.getElementById(tabs[tabName]).classList.add('active');
@@ -972,21 +616,29 @@ ORDER BY total_pannes DESC;</pre>
             if (tabName === 'history') loadHistory();
         }
 
-        function loadMachines() {
-            const machines = db.getMachineNames();
+        async function loadMachines() {
             const container = document.getElementById('machinesList');
-            
-            container.innerHTML = machines.map(machine => {
-                const pannes = db.getByMachine(machine);
-                return `
-                    <div class="machine-card" onclick="viewMachineHistory('${machine}')">
-                        <h4>🏭 ${machine}</h4>
-                        <p style="color: #666; margin-top: 8px;">
-                            ${pannes.length} panne(s) enregistrée(s)
-                        </p>
-                    </div>
-                `;
-            }).join('');
+            container.innerHTML = '<p style="text-align:center;">Chargement...</p>';
+
+            try {
+                const response = await fetch(`${API_URL}?action=getMachines`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    container.innerHTML = data.machines.map(machine => `
+                        <div class="machine-card" onclick="viewMachineHistory('${machine.name}')">
+                            <h4>🏭 ${machine.name}</h4>
+                            <p style="color: #666; margin-top: 8px;">
+                                ${machine.count} panne(s) enregistrée(s)
+                            </p>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p style="color:red;">Erreur de chargement</p>';
+                }
+            } catch (error) {
+                container.innerHTML = '<p style="color:red;">Erreur de connexion</p>';
+            }
         }
 
         function filterMachines() {
@@ -999,49 +651,81 @@ ORDER BY total_pannes DESC;</pre>
             });
         }
 
-        function loadHistory() {
-            const data = db.getAll();
+        async function loadHistory() {
             const container = document.getElementById('historyList');
-            
-            container.innerHTML = `
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Machine</th>
-                            <th>Problème</th>
-                            <th>Cause</th>
-                            <th>Résolution</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${data.map(item => `
-                            <tr>
-                                <td>${new Date(item.date_created).toLocaleDateString('fr-FR')}</td>
-                                <td><strong>${item.machine_name}</strong></td>
-                                <td>${item.problem}</td>
-                                <td>${item.cause}</td>
-                                <td>${item.resolution}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
+            container.innerHTML = '<p style="text-align:center;">Chargement...</p>';
+
+            try {
+                const response = await fetch(`${API_URL}?action=getAll`);
+                const data = await response.json();
+                
+                if (data.success && data.pannes.length > 0) {
+                    container.innerHTML = `
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Date</th>
+                                    <th>Machine</th>
+                                    <th>Problème</th>
+                                    <th>Cause</th>
+                                    <th>Résolution</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.pannes.map(item => `
+                                    <tr>
+                                        <td>${item.id}</td>
+                                        <td>${new Date(item.date_created).toLocaleDateString('fr-FR')}</td>
+                                        <td><strong>${item.machine_name}</strong></td>
+                                        <td>${item.problem}</td>
+                                        <td>${item.cause}</td>
+                                        <td>${item.resolution}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    container.innerHTML = '<p style="text-align:center;">Aucune donnée</p>';
+                }
+            } catch (error) {
+                container.innerHTML = '<p style="color:red;">Erreur de connexion</p>';
+            }
         }
 
-        function addBreakdown(event) {
+        async function addBreakdown(event) {
             event.preventDefault();
             
-            const newItem = {
+            const alertDiv = document.getElementById('addAlert');
+            const formData = {
                 machine_name: document.getElementById('machineName').value,
                 problem: document.getElementById('problem').value,
                 cause: document.getElementById('cause').value,
                 resolution: document.getElementById('resolution').value
             };
 
-            db.add(newItem);
-            alert('✅ Panne enregistrée avec succès !');
-            document.getElementById('breakdownForm').reset();
+            try {
+                const response = await fetch(`${API_URL}?action=add`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alertDiv.innerHTML = '<div class="alert alert-success">✅ Panne enregistrée dans MySQL avec succès !</div>';
+                    document.getElementById('breakdownForm').reset();
+                    setTimeout(() => alertDiv.innerHTML = '', 3000);
+                } else {
+                    alertDiv.innerHTML = `<div class="alert alert-error">❌ Erreur: ${data.error}</div>`;
+                }
+            } catch (error) {
+                alertDiv.innerHTML = '<div class="alert alert-error">❌ Erreur de connexion</div>';
+            }
         }
 
         function viewMachineHistory(machineName) {
@@ -1057,6 +741,11 @@ ORDER BY total_pannes DESC;</pre>
         }
 
         // Chat
+        const chatContainer = document.getElementById('chatContainer');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const loading = document.getElementById('loading');
+
         function addMessage(content, role) {
             const welcomeMsg = chatContainer.querySelector('.welcome-message');
             if (welcomeMsg) welcomeMsg.remove();
@@ -1079,7 +768,7 @@ ORDER BY total_pannes DESC;</pre>
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
-        function sendMessage() {
+        async function sendMessage() {
             const message = userInput.value.trim();
             if (!message) return;
 
@@ -1091,91 +780,31 @@ ORDER BY total_pannes DESC;</pre>
 
             loading.classList.add('active');
 
-            // Simuler un délai de traitement
-            setTimeout(() => {
-                const response = ai.analyzeQuery(message);
-                addMessage(response, 'assistant');
+            try {
+                const response = await fetch(`${API_URL}?action=query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query: message })
+                });
                 
-                loading.classList.remove('active');
-                userInput.disabled = false;
-                sendBtn.disabled = false;
-                userInput.focus();
-            }, 500);
-        }
+                const data = await response.json();
+                
+                if (data.success) {
+                    addMessage(data.response, 'assistant');
+                } else {
+                    addMessage("Erreur lors du traitement de votre demande.", 'assistant');
+                }
+            } catch (error) {
+                addMessage("Erreur de connexion à l'API.", 'assistant');
+            }
 
-        function downloadSQL() {
-            const sqlContent = `-- Base de données Maintenance Agroalimentaire
--- Date: ${new Date().toLocaleDateString('fr-FR')}
-
-CREATE DATABASE IF NOT EXISTS maintenance_agro;
-USE maintenance_agro;
-
--- Création de la table
-CREATE TABLE pannes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    machine_name VARCHAR(255) NOT NULL,
-    problem TEXT NOT NULL,
-    cause TEXT NOT NULL,
-    resolution TEXT NOT NULL,
-    date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_machine (machine_name),
-    INDEX idx_date (date_created)
-);
-
--- Insertion des données
-${db.getAll().map(item => `INSERT INTO pannes (machine_name, problem, cause, resolution, date_created) 
-VALUES (
-    '${item.machine_name.replace(/'/g, "''")}',
-    '${item.problem.replace(/'/g, "''")}',
-    '${item.cause.replace(/'/g, "''")}',
-    '${item.resolution.replace(/'/g, "''")}',
-    '${item.date_created}'
-);`).join('\n')}
-
--- Requêtes utiles
-
--- 1. Historique complet par machine
-SELECT * FROM pannes 
-WHERE machine_name = 'Pasteurisateur' 
-ORDER BY date_created DESC;
-
--- 2. Statistiques par machine
-SELECT machine_name, COUNT(*) as total_pannes 
-FROM pannes 
-GROUP BY machine_name 
-ORDER BY total_pannes DESC;
-
--- 3. Pannes récentes (30 derniers jours)
-SELECT * FROM pannes 
-WHERE date_created >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-ORDER BY date_created DESC;
-
--- 4. Recherche par mot-clé
-SELECT * FROM pannes 
-WHERE problem LIKE '%température%' 
-   OR cause LIKE '%température%';
-
--- 5. Machines les plus problématiques
-SELECT machine_name, COUNT(*) as nb_pannes 
-FROM pannes 
-GROUP BY machine_name 
-HAVING nb_pannes > 1
-ORDER BY nb_pannes DESC;
-`;
-
-            const blob = new Blob([sqlContent], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'maintenance_agroalimentaire.sql';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        // Initialisation
-        window.addEventListener('load', () => {
+            loading.classList.remove('active');
+            userInput.disabled = false;
+            sendBtn.disabled = false;
             userInput.focus();
-        });
+        }
     </script>
 </body>
 </html>
