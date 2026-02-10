@@ -717,19 +717,36 @@
                        {
                         id: 10,
                         machine_name: 'Étiqueteuse',
-                        problem: 'Étiquette non collée',
-                        cause: 'Défaillance du système de collage',
-                        resolution: 'Vérification et remplacement du système de collage défectueux',
+                        problem: 'Étiquette mal postionnée',
+                        cause: 'Poste mal réglé ou trop de colle sur l\'étiquette',
+                        resolution: 'Réglage du poste ou nettoyage de la colle',
                         date_created: '2026-02-11 12:00:00'
                     },
                        {
                         id: 11,
                         machine_name: 'Étiqueteuse',
                         problem: 'Étiquette mal positionnée',
-                        cause: 'Défaillance du système de positionnement',
-                        resolution: 'Vérification et remplacement du système de positionnement défectueux',
+                        cause: 'Trop de colle sur l\'étiquette ou bloc pinces mal régler ou mousses usées',
+                        resolution: 'Réglage de la colle ou réglage du bloc pinces ou remplacement des mousses usées',
+                        date_created: '2026-02-11 12:00:00'
+                    },
+                        {
+                        id: 12,
+                        machine_name: 'Étiqueteuse',
+                        problem: 'Défaut accrochage libre',
+                        cause: 'Capteur d\'accrochage libre mal réglé ou encrassé ou défectueux',
+                        resolution: 'Réglage du capteur d\'accrochage libre ou nettoyage ou remplacement du capteur défectueux',
+                        date_created: '2026-02-11 12:00:00'
+                    },
+                        {
+                        id: 13,
+                        machine_name: 'Étiqueteuse',
+                        problem: 'Défaut module de synchronisation',
+                        cause: 'Capteur de synchronisation mal réglé ou encrassé ou défectueux',
+                        resolution: 'Réglage du capteur de synchronisation ou nettoyage ou remplacement du capteur défectueux',
                         date_created: '2026-02-11 12:00:00'
                     }
+                    
                     
                 ];
                 this.save();
