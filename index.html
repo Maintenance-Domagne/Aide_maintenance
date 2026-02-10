@@ -633,30 +633,33 @@
 
             initDefaultData() {
                 this.data = [
+                    // Données du dépalettiseur
                     {
                         id: 1,
-                        machine_name: 'Pasteurisateur',
-                        problem: 'Température de pasteurisation instable',
-                        cause: 'Sonde de température PT100 défectueuse',
-                        resolution: 'Remplacement de la sonde PT100 et recalibration du système',
-                        date_created: '2026-02-05 09:30:00'
+                        machine_name: 'Dépalettiseur',
+                        problem: 'Défaut cellules "time out"',
+                        cause: 'Cellules obstruées ou mal alignées',
+                        resolution: 'Nettoyage des cellules et réalignement, vérification du câblage',
+                        date_created: '2026-02-11 12:00:00'
                     },
                     {
                         id: 2,
-                        machine_name: 'Ligne de Remplissage',
-                        problem: 'Arrêt intempestif de la ligne',
-                        cause: 'Capteur de niveau encrassé',
-                        resolution: 'Nettoyage du capteur ultrason et vérification du câblage',
-                        date_created: '2026-02-06 14:15:00'
+                        machine_name: 'Dépalettiseur',
+                        problem: 'Défaut noeud profinet',
+                        cause: 'Défaillance du câble profinet ou de l\'actionneur associé',
+                        resolution: 'Remplacement du câble ou de l\'actionneur défectueux',
+                        date_created: '2026-02-11 12:00:00'
                     },
                     {
                         id: 3,
-                        machine_name: 'Convoyeur Central',
-                        problem: 'Bruit anormal et vibrations',
-                        cause: 'Roulements usés et courroie détendue',
-                        resolution: 'Remplacement des roulements et tension de la courroie',
-                        date_created: '2026-02-07 11:00:00'
+                        machine_name: 'Dépalettiseur',
+                        problem: 'Les caisses sont mal évacuées',
+                        cause: 'Défaillance d\'une ou plusieurs cellules ou problème de temporisation ou de vitesse du convoyeur',
+                        resolution: 'Vérification et nettoyage des cellules ou ajustement de la temporisation ou de la vitesse du convoyeur',
+                        date_created: '2026-02-11 12:00:00'
                     },
+
+                    // Données de la décaisseuse
                     {
                         id: 4,
                         machine_name: 'Système CIP',
