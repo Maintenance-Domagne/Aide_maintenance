@@ -662,28 +662,77 @@
                     // Données de la décaisseuse
                     {
                         id: 4,
-                        machine_name: 'Système CIP',
-                        problem: 'Perte de pression dans le circuit',
-                        cause: 'Fuite au niveau des joints de pompe',
-                        resolution: 'Remplacement des joints toriques et test d\'étanchéité',
-                        date_created: '2026-02-08 08:45:00'
+                        machine_name: 'Décaisseuse',
+                        problem: 'Problème de blocage caisses',
+                        cause: 'Cellules de détection des caisses encrassées ou usées ou mal régler',
+                        resolution: 'Nettoyage ou remplacement ou réglage des cellules de détection',
+                        date_created: '2026-02-11 12:00:00'
                     },
                     {
                         id: 5,
-                        machine_name: 'Pasteurisateur',
-                        problem: 'Alarme haute température',
-                        cause: 'Vanne de régulation bloquée en position ouverte',
-                        resolution: 'Démontage et nettoyage de la vanne, remplacement du joint',
-                        date_created: '2026-02-09 10:20:00'
+                        machine_name: 'Décaisseuse',
+                        problem: 'Tête de décaisseuse bloquée',
+                        cause: 'Détection d\'obstacle sur la tête de décaisseuse',
+                        resolution: 'Vérification du capteur et/ou retrait de l\'obstacle',
+                        date_created: '2026-02-11 12:00:00'
                     },
+
+                    // Données de la laveuse
                     {
                         id: 6,
-                        machine_name: 'Ligne de Remplissage',
-                        problem: 'Dosage imprécis',
-                        cause: 'Pompe doseuse avec membrane usée',
-                        resolution: 'Remplacement du kit membrane et recalibration',
-                        date_created: '2026-02-10 07:30:00'
-                    }
+                        machine_name: 'Laveuse de bouteilles',
+                        problem: 'Défaut de dosage de lessive',
+                        cause: 'Pompe doseuse défectueuse ou tuyau d\'alimentation bouché ou désamorcé',
+                        resolution: 'Vérification de l\'amorçage de la pompe doseuse ou nettoyage du tuyau d\'alimentation ou remplacement de la pompe doseuse',
+                        date_created: '2026-02-11 12:00:00'
+                    },
+                     {
+                        id: 7,
+                        machine_name: 'Laveuse de bouteilles',
+                        problem: 'Présence de bouteilles dans les bains de rinçage',
+                        cause: 'Alvéoles endommagées ou défectueuses',
+                        resolution: 'Remplacement des alvéoles endommagées ou défectueuses',
+                        date_created: '2026-02-11 12:00:00'
+                    },
+
+                    // Données de la rinçeuse
+                      {
+                        id: 8,
+                        machine_name: 'Rinçeuse',
+                        problem: 'Les robinets de rinçage ne s\'ouvrent pas',
+                        cause: 'Défaillance de la bobine électromagnétique ou du capteur de bouteille ou relais de commande défectueux',
+                        resolution: 'Vérification et remplacement de la bobine électromagnétique ou du capteur de bouteille ou relais de commande défectueux',
+                        date_created: '2026-02-11 12:00:00'
+                    },
+                       {
+                        id: 9,
+                        machine_name: 'Rinçeuse',
+                        problem: 'Certaines bobines de rinçage ne fonctionnent pas',
+                        cause: 'Défaillance de la bobine de rinçage',
+                        resolution: 'Remplacement de la bobine de rinçage défectueuse',
+                        date_created: '2026-02-11 12:00:00'
+                    },
+
+                    // Données de l'étiqueteuse'
+                       {
+                        id: 10,
+                        machine_name: 'Étiqueteuse',
+                        problem: 'Étiquette non collée',
+                        cause: 'Défaillance du système de collage',
+                        resolution: 'Vérification et remplacement du système de collage défectueux',
+                        date_created: '2026-02-11 12:00:00'
+                    },
+                       {
+                        id: 11,
+                        machine_name: 'Étiqueteuse',
+                        problem: 'Étiquette mal positionnée',
+                        cause: 'Défaillance du système de positionnement',
+                        resolution: 'Vérification et remplacement du système de positionnement défectueux',
+                        date_created: '2026-02-11 12:00:00'
+                    },
+                        resolution: '',
+                        date_created: '2026-02-11 12:00:00'
+                    },
                 ];
                 this.save();
             }
